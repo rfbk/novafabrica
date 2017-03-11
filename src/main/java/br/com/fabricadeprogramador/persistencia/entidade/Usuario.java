@@ -11,6 +11,12 @@ public class Usuario {
 	public void setId(Integer id) {
 		this.id = id;
 	}
+		
+	@Override	
+	public String toString() {
+		return "Usuario [id=" + id + ", nome=" + nome + ", login=" + login
+				+ ", senha=" + senha + "]";
+	}
 	public String getNome() {
 		return nome;
 	}

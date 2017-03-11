@@ -2,7 +2,10 @@ package br.com.fabricadeprogramador.persistencia.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import br.com.fabricadeprogramador.persistencia.entidade.Usuario;
 
@@ -64,4 +67,109 @@ public class UsuarioDAO {
 		}
 	}
 
+	public void salvar(Usuario usu) {
+		if (usu.getId()!=null && usu.getId() != 0) {
+			alterar(usu);
+		} else {
+			cadastrar(usu);
+		}		
+	}
+	
+	
+	/**
+	 * Autentica um login e senha do objeto de usuário do parâmetro
+	 * @param usu
+	 * @return
+	 */
+	public boolean autenticarUsuario(Usuario usu) {
+		String sql = "select * from usuario where login = ?";
+		ResultSet result;
+		String senha;
+		String senhaDigitada = usu.getSenha();
+		
+		try (PreparedStatement statement = con.prepareStatement(sql)) {
+			//Inserindo login do usuário no parâmetro
+			statement.setString(1, usu.getLogin());
+			
+			result = statement.executeQuery();
+			
+			//Verdadeiro quando há próximo registro
+			while (result.next()) {
+				senha = result.getString("senha");
+				//System.out.println(senha == senhaDigitada);
+				usu.setId(result.getInt("id"));
+				usu.setNome(result.getString("nome"));		
+				
+				return (senha.equals(senhaDigitada));
+			}
+			return false;			
+					
+		} catch (SQLException e) {
+			e.printStackTrace();
+			//Nenhum registro com o login informado foi localizado
+			return false;
+		}
+	}
+	
+	/**
+	 * Busca de todos registros no banco de dados	 
+	 * @return Retorna uma lista vazia quando não encontra registros, ou um objeto Usuario caso contrário.
+	 */
+	public List<Usuario> buscarTodos() {
+		List<Usuario> listaUsuarios = new ArrayList<Usuario>();
+		Usuario usu = new Usuario();
+		
+		String sql = "Select * from usuario";
+		
+		try (PreparedStatement preparador = con.prepareStatement(sql)) {
+			ResultSet result = preparador.executeQuery();
+			
+			//Posicionando o cursor no primeiro registro
+			 //move o cursor para o próximo registro, ou a primeira linha
+			while (result.next()) {
+				usu = new Usuario();				
+				usu.setId(result.getInt("id")); //índice ou texto da coluna
+				usu.setNome(result.getString("nome"));
+				usu.setLogin(result.getString("login"));
+				usu.setSenha(result.getString("senha"));
+				listaUsuarios.add(usu); //Adicionando usuário atual				
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	
+		return listaUsuarios; //retornando lista de usuários		
+	}	
+	
+	
+	/**
+	 * Busca de um registro no banco de dados conforme id do parâmetro
+	 * @param id É um int que representa o número do id do usuário a ser buscado
+	 * @return Retorna Null quando não encontra registro, ou um objeto Usuario caso contrário.
+	 */
+	public Usuario buscarPorId(Integer id) {
+		Usuario usu = new Usuario();
+		
+		String sql = "Select * from usuario where id = ?";
+		
+		try (PreparedStatement preparador = con.prepareStatement(sql)) {
+			preparador.setInt(1, id); //parâmetro e valor
+			
+			ResultSet result = preparador.executeQuery();
+			
+			//Posicionando o cursor no primeiro registro
+			 //move o cursor para o próximo registro, ou a primeira linha
+			if (result.next()) {
+				usu.setId(result.getInt("id")); //índice ou texto da coluna
+				usu.setNome(result.getString("nome"));
+				usu.setLogin(result.getString("login"));
+				usu.setSenha(result.getString("senha"));
+				
+				return usu;
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	
+		return null;		
+	}	
 }
