@@ -30,6 +30,12 @@ public class UsuarioControler extends HttpServlet {
 		String acao = req.getParameter("acao");
 		UsuarioDAO usuarioDAO = new UsuarioDAO();
 		
+		//Verificando se o req possui uma sessao, se nao, retorna à pagina de login
+		if (req.getSession(false)== null) {
+			resp.getWriter().print("<script>window.alert('Sessao inexistente ou expirada! Por favor, insira novamente seus dados.'); location.href='login.html';</script>");
+			
+		}
+		
 		if (acao.equals("exc")) {
 			String id = req.getParameter("id");
 			Usuario usu = new Usuario();

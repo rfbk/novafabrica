@@ -13,6 +13,8 @@
 	Usuario usu = (Usuario) request.getAttribute("usu");		
 	%>
 	
+	<%@include file="menu.jsp" %>
+	
 	<h1>Login:<%=usu.getLogin()%></h1>
 
 	<form action="usucontroler.do" method="post">

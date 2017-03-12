@@ -19,6 +19,8 @@ function confirmaExclusao (id) {
 </head>
 <body>
 
+<%@include file="menu.jsp" %>
+
 <%
 List<Usuario> lista = (List<Usuario>) request.getAttribute("lista"); //Lista obtida e convertida  
 %>

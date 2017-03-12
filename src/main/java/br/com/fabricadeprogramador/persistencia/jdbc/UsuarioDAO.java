@@ -15,7 +15,7 @@ public class UsuarioDAO {
 	
 	public void cadastrar(Usuario usu) {
 		//String sql = "insert into usuario (nome, login, senha ) values ('" + usu.getNome() + "','" + usu.getLogin() + "','" + usu.getSenha() + "');";
-		String sql = "insert into usuario (nome, login, senha ) values (?,?,?);";
+		String sql = "insert into usuario (nome, login, senha ) values (?,?,md5(?));";
 		
 		//Essa sintaxe de try fecha automaticamente o PreparedStatement no final
 		//Isso acontece pois o objeto PreparedStatement implementa a interface
@@ -35,7 +35,7 @@ public class UsuarioDAO {
 	}
 
 	public void alterar(Usuario usu) {
-		String sql = "update usuario set nome=?, login=?, senha=? where id=?;";
+		String sql = "update usuario set nome=?, login=?, senha=md5(?) where id=?;";
 		
 		//Essa sintaxe de try fecha automaticamente o PreparedStatement no final
 		//Isso acontece pois o objeto PreparedStatement implementa a interface
@@ -74,6 +74,39 @@ public class UsuarioDAO {
 			cadastrar(usu);
 		}		
 	}
+	
+	
+	/**
+	 * Autentica um login e senha do objeto de usuário do parâmetro
+	 * @param usu
+	 * @return
+	 */
+	public Usuario autenticar(Usuario usu) {
+		String sql = "select * from usuario where login = ? and senha=md5(?)";
+		ResultSet result;
+		String senhaDigitada = usu.getSenha();
+		
+		try (PreparedStatement statement = con.prepareStatement(sql)) {
+			//Inserindo login do usuário no parâmetro
+			statement.setString(1, usu.getLogin());
+			statement.setString(2, senhaDigitada);
+			
+			//Obtendo lista de resultados da consulta no banco de dados
+			result = statement.executeQuery();
+			
+			//Verdadeiro quando há próximo registro
+			if (result.next()) { //Salvando informacoes no objeto Usuario			
+				usu.setId(result.getInt("id"));
+				usu.setNome(result.getString("nome"));
+				return usu;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();					
+		}
+//		Nenhum registro com o login informado foi localizado
+		return null;
+	}
+	
 	
 	
 	/**
